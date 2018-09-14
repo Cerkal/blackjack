@@ -40,9 +40,8 @@ class Person():
 	card1 = ()
 	card2 = ()
 
-	def __init__(self, cards):
-
-		self.cards = cards;
+	def __init__(self):
+		pass
 
 	def widthdraw(self, amount):
 		self.money = self.money - amount
@@ -55,7 +54,15 @@ class Person():
 			self.card2 = card2
 			break
 
-player = Person('cards')
+
+
+
+dealer = Person()
+dealer.set_cards()
+print(dealer.card1)
+print(dealer.card2)
+
+player = Person()
 
 player.widthdraw(30)
 
