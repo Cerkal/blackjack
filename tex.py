@@ -258,6 +258,26 @@ def take_bet(chips):
             else:
                 break
 
+def check(player):
+	if royal_flush(player, board.cards):
+		print('Royal Flush')
+	elif straight_flush(player, board.cards):
+		print('Straight Flush')
+	elif four_of_a_kind(player, board.cards):
+		print('Four of a Kind')
+	elif full_house(player, board.cards):
+		print('Full House')
+	elif flush(player, board.cards):
+		print('Flush')
+	elif straight(player, board.cards):
+		print('Straight')
+	elif three_of_a_kind(player, board.cards):
+		print('Three of a Kind')
+	elif two_pair(player, board.cards):
+		print('Two Pair')
+	elif pair(player, board.cards):
+		print('Pair')	
+
 while True:
 
 
@@ -281,46 +301,82 @@ while True:
 	chips = Chips()
 
 	take_bet(chips)
+	print('\n'*100)
+
 
 	board = Board()
 	board.flop()
-	board.turn()
-	board.river()
 
-	#player.cards = [('A','♡'),('10','♡')]
-	#board.cards = [('9','♡'),('10','♡'),('2','x')]
+	#player.cards = [('A','♡'),('A','♡')]
+	#board.cards = [('A','♡'),('A','♡'),('A','♡')]
 	
-	display_cards(player.cards,'player')
+	
 	print('You')
+	check(player)
+	display_cards(player.cards,'player')
+	print('\n')		
 
-	#display_cards(player2.cards,'player')
-	#print('player2')
+	print('player2')
+	check(player2)
+	display_cards(player2.cards,'player')
+	print('\n')	
 
-	#display_cards(player3.cards,'player')
-	#print('Player3')
-	
-	if royal_flush(player, board.cards):
-		print('Royal Flush')
-	elif straight_flush(player, board.cards):
-		print('Straight Flush')
-	elif four_of_a_kind(player, board.cards):
-		print('Four of a Kind')
-	elif full_house(player, board.cards):
-		print('Full House')
-	elif flush(player, board.cards):
-		print('Flush')
-	elif straight(player, board.cards):
-		print('Straight')
-	elif three_of_a_kind(player, board.cards):
-		print('Three of a Kind')
-	elif two_pair(player, board.cards):
-		print('Two Pair')
-	elif pair(player, board.cards):
-		print('Pair')	
-	
+	print('Player3')
+	check(player3)
+	display_cards(player3.cards,'player')
+	print('\n')	
+
 	display_cards(board.cards, 'player')
 
-	#take_bet(chips)
+
+	take_bet(chips)
+	print('\n'*100)
+
+	board.turn()
+
+	print('You')
+	check(player)
+	display_cards(player.cards,'player')
+	print('\n')	
+
+	print('player2')
+	check(player2)
+	display_cards(player2.cards,'player')
+	print('\n')	
+	
+	print('Player3')
+	check(player3)
+	display_cards(player3.cards,'player')
+	print('\n')		
+
+	display_cards(board.cards, 'player')
+
+	board.river()
+
+	take_bet(chips)
+	print('\n'*100)
+
+	print('You')
+	check(player)
+	display_cards(player.cards,'player')
+	print('\n')		
+	
+
+	print('player2')
+	check(player2)
+	display_cards(player2.cards,'player')
+	print('\n')	
+
+	print('Player3')
+	check(player3)
+	display_cards(player3.cards,'player')
+	print('\n')		
+
+	display_cards(board.cards, 'player')
+
+	take_bet(chips)
+	print('\n'*100)
+
 
 	game = input('continue?')
 
