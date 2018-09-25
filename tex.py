@@ -7,6 +7,8 @@ order_dic = {'A':1,'2':2,'3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9,'10':10,'J':1
 
 lines = ['','','','','']
 
+everyonein = True
+
 class Deck():
 	def __init__(self):
 		self.cards = []
@@ -19,14 +21,64 @@ class Deck():
 class Hand():
 	def __init__(self):
 		self.cards = []
-
+		self.name = ''
+		self.active = True
 	def addCard(self):
 		self.cards.append(deck.pop())
+	def call(self, player, bet):
+		pass
+
+class Comp():
+	def __init__(self):
+		self.cards = []
+		self.name = ''
+		self.active = True
+	def addCard(self):
+		self.cards.append(deck.pop())
+	def call(self, player, bet):
+		x = check(player)
+		try:
+			int(x)
+			if (bet <= x*100):
+				#print(x*10)
+				print('call')
+				chips.pot += bet
+			else:
+				print('fold')
+				self.active = False
+		except:
+			print('fold')
+			self.active = False
+
+		print('-----------------')
 
 class Chips():
 	def __init__(self):
 		self.total = 1000
 		self.bet = 0
+		self.pot = 0
+
+	def take_bet(self):
+	    while True:
+	        try:
+	            self.bet = int(input('How many chips would you like to bet? '))
+	        except ValueError:
+	            print('Sorry, a bet must be an integer!')
+	        else:
+	            if self.bet > self.total:
+	                print("Sorry, your bet can't exceed",self.total)
+	            else:
+	            	self.pot += self.bet
+	            	break
+	
+	def lost(self):
+		self.total -= self.bet
+
+
+	def win(self):
+		self.total += self.pot
+
+
 
 class Board():
 	def __init__(self):
@@ -43,11 +95,14 @@ class Board():
 	def river(self):
 		self.cards.append(deck.pop())
 
-class Check():
+class Turn():
 	def __init__(self):
-		self.player1 = 0
-		self.player2 = 0
-		self.player3 = 0
+		self.turn = 0
+
+	def rotate(self):
+		self.turn += 1
+		if self.turn == 3:
+			self.turn = 0
 
 
 def royal_flush(player, board):
@@ -57,36 +112,37 @@ def royal_flush(player, board):
 		for card in cards:
 			if card in goal:
 				goal.remove(card)
-				#print(goal)
 
 		if goal == []:
 			return True
 
+
 def straight_flush(player, board):
 	cards = player.cards + board
 	ordered = []
-	count = 0
+	count = 1
+	suit_count = 0
 	for card in cards:
 		ordered.append((order_dic[card[0]],card[1]))
 
 	ordered = set(ordered)
-
 	ordered = list(ordered)
 	ordered = sorted(ordered)
+
+	for suit in suits:					
+		l_a = ordered
+		l_b = list(range(0,15))
+
+		for i,n in enumerate(l_a):
+			try:
+				if n[0]+1 == l_a[i+1][0] and l_a[i+1][1] == suit:
+					count += 1
+			except:
+				pass
+
+		if count >= 5:
+			return True
 	
-	string = ''.join(str(x[0]) for x in ordered)
-	
-	myrange = range(0,15)
-	myrange = ''.join(str(x) for x in myrange)
-	
-	if string in myrange:
-		for suit in suits:
-			count = 0
-			for x in ordered:
-				if suit == x[1]:
-					count+=1
-					if count == 5:
-						return True
 
 def four_of_a_kind(player, board):
 	cards = player.cards + board
@@ -121,7 +177,6 @@ def full_house(player, board):
 
 	if count == 5:
 		return True
-	#print(count)
 
 def flush(player, board):
 	cards = player.cards + board
@@ -139,35 +194,33 @@ def flush(player, board):
 			item = item[0]
 			b[item] = b.get(item, 0) + 1		
 	
-	#print(b)
-
 	for x in b:
 		if b[x] >= 5:
 			return True
-
-	#if string in myrange:
-	#	return True
 
 
 def straight(player, board):
 	cards = player.cards + board
 	ordered = []
-	count = 0
+	count = 1
 	for card in cards:
 		ordered.append(order_dic[card[0]])
 
 	ordered = set(ordered)
-
 	ordered = list(ordered)
 	ordered = sorted(ordered)
 
-	string = ''.join(str(x) for x in ordered)
-	
-	#print(string)
-	myrange = range(0,15)
-	myrange = ''.join(str(x) for x in myrange)
-	#print(myrange)
-	if string in myrange and len(ordered) > 4:
+	l_a = ordered
+	l_b = list(range(0,15))
+
+	for i,n in enumerate(l_a):
+		try:
+			if n+1 == l_a[i+1]:
+				count += 1
+		except:
+			pass
+
+	if count >= 5:
 		return True
 
 def three_of_a_kind(player, board):
@@ -195,14 +248,12 @@ def two_pair(player, board):
 		item = item[0]
 		b[item] = b.get(item, 0) + 1
 
-	#print(b)
 	for x in b:
 		if b[x] == 2:
 			count += 1
 		if b[x] == 2:
 			count += 1
 
-	#print(count)
 	if count == 4:
 		return True
 
@@ -216,11 +267,10 @@ def pair(player, board):
 		item = item[0]
 		b[item] = b.get(item, 0) + 1
 
-	#print(b)
 	for x in b:
 		if b[x] == 2:
 			count += 2
-	#print(count)
+
 	if count == 2:
 		return True
 
@@ -245,140 +295,191 @@ def draw_screen():
 	display_cards(player.hand.cards, 'player')
 	print(player.hand.value)
 
-def take_bet(chips):
-
-    while True:
-        try:
-            chips.bet = int(input('How many chips would you like to bet? '))
-        except ValueError:
-            print('Sorry, a bet must be an integer!')
-        else:
-            if chips.bet > chips.total:
-                print("Sorry, your bet can't exceed",chips.total)
-            else:
-                break
 
 def check(player):
 	if royal_flush(player, board.cards):
-		print('Royal Flush')
+		printClass(9)
+		return 9 
 	elif straight_flush(player, board.cards):
-		print('Straight Flush')
+		printClass(8)
+		return 8
 	elif four_of_a_kind(player, board.cards):
-		print('Four of a Kind')
+		printClass(7)
+		return 7
 	elif full_house(player, board.cards):
-		print('Full House')
+		printClass(6)
+		return 6
 	elif flush(player, board.cards):
-		print('Flush')
+		printClass(5)
+		return 5
 	elif straight(player, board.cards):
-		print('Straight')
+		printClass(4)
+		return 4
 	elif three_of_a_kind(player, board.cards):
-		print('Three of a Kind')
+		printClass(3)
+		return 3
 	elif two_pair(player, board.cards):
-		print('Two Pair')
+		printClass(2)
+		return 2
 	elif pair(player, board.cards):
-		print('Pair')	
+		printClass(1)
+		return 1
+	else:
+		return 0
+def printClass(n):
+	#             0        1          2                3               4           5           6                 7                 8                 9
+	printer = ['(None)','(Pair)','(Two Pair)','(Three of a Kind)','(Straight)','(Flush)','(Full House)','(Four of a Kind)','(Straight Flush)','(Royal Flush)']
+	#print(printer[n])
+
+
+def isEveryoneIn(players):
+	#print(players[1].active)
+	#print(players[2].active)
+	if players[1].active or players[2].active:
+		return True
+	return False
+
+
+
+player_turn = Turn()
+chips = Chips()
+
 
 while True:
 
+	print(player_turn.turn)
 
 	deck = Deck()
 	deck.mix()
 	random.shuffle(deck.cards)
 	deck = deck.cards
 
+
 	player = Hand()
+	player.name = 'You'
 	player.addCard()
 	player.addCard()
 
-	player2 = Hand()
+	chips.bet = 0
+
+	player2 = Comp()
+	player2.name = 'Player2'
 	player2.addCard()
 	player2.addCard()
 
-	player3 = Hand()
+	player3 = Comp()
+	player3.name = 'Player3'
 	player3.addCard()
 	player3.addCard()
 
-	chips = Chips()
+	
 
-	take_bet(chips)
 	print('\n'*100)
-
 
 	board = Board()
 	board.flop()
 
-	#player.cards = [('A','♡'),('A','♡')]
-	#board.cards = [('A','♡'),('A','♡'),('A','♡')]
+
+
+	while everyonein:
+
+		
+		# computer makes call or fold
+		chips.take_bet()
+
+		
+		#player.cards = [('A','♡'),('2','♡')]
+		#board.cards = [('3','♡'),('4','x'),('5','x'),('6','x'),('9','♡')]
+
+		players = [player,player2,player3]
+
+		for p in players:
+			if (p.active == True):
+				print(p.name)
+				p.call(p, chips.bet)
+				check(p)
+				display_cards(p.cards,'player')
+				print('\n')
+
+		if isEveryoneIn(players) == False:
+			break
+
+		display_cards(board.cards, 'player')
+
+		chips.take_bet()
+		print('\n'*100)
+
+		#BET
+		print(chips.bet)
+
+		board.turn()
+
+		for p in players:
+			if (p.active == True):
+				print(p.name)
+				p.call(p, chips.bet)
+				check(p)
+				display_cards(p.cards,'player')
+				print('\n')		
+
+		if isEveryoneIn(players) == False:
+			break
+
+		display_cards(board.cards, 'player')
+
+		board.river()
+
+		chips.take_bet()
+		print('\n'*100)
+
+		#BET
+		print(chips.bet)
+
+		for p in players:
+			if (p.active == True):
+				print(p.name)
+				p.call(p, chips.bet)
+				check(p)
+				display_cards(p.cards,'player')
+				print('\n')			
+
+		if isEveryoneIn(players) == False:
+			break
+
+		display_cards(board.cards, 'player')
+
+		chips.take_bet()
+		
+		#BET
+		print(chips.bet)
+
+		everyonein = False
+
+
+	print('///////////////////////////////////////////////////')
+	print('///////////////// End of game! ////////////////////')
+	print('///////////////////////////////////////////////////')
+
+	gameover = [(check(player),player.name),(check(player2),player2.name),(check(player3),player3.name)]
 	
-	
-	print('You')
-	check(player)
-	display_cards(player.cards,'player')
-	print('\n')		
+	gameover = sorted(gameover)
 
-	print('player2')
-	check(player2)
-	display_cards(player2.cards,'player')
-	print('\n')	
+	name = gameover.pop()[1]
+	print('Winner: ' + name + '!')
 
-	print('Player3')
-	check(player3)
-	display_cards(player3.cards,'player')
-	print('\n')	
+	if name == 'You':
+		print('You win {} chips!'.format(chips.pot))
+		chips.win()
+	else:
+		print('You lose {} chips!'.format(chips.pot))
+		chips.lost()
 
-	display_cards(board.cards, 'player')
-
-
-	take_bet(chips)
-	print('\n'*100)
-
-	board.turn()
-
-	print('You')
-	check(player)
-	display_cards(player.cards,'player')
-	print('\n')	
-
-	print('player2')
-	check(player2)
-	display_cards(player2.cards,'player')
-	print('\n')	
-	
-	print('Player3')
-	check(player3)
-	display_cards(player3.cards,'player')
-	print('\n')		
-
-	display_cards(board.cards, 'player')
-
-	board.river()
-
-	take_bet(chips)
-	print('\n'*100)
-
-	print('You')
-	check(player)
-	display_cards(player.cards,'player')
-	print('\n')		
-	
-
-	print('player2')
-	check(player2)
-	display_cards(player2.cards,'player')
-	print('\n')	
-
-	print('Player3')
-	check(player3)
-	display_cards(player3.cards,'player')
-	print('\n')		
-
-	display_cards(board.cards, 'player')
-
-	take_bet(chips)
-	print('\n'*100)
-
-
+	print('You currently have {} chips left'.format(chips.total))
 	game = input('continue?')
 
 	if game == 'n':
 		break
+	else:
+		everyonein = True
+
+	
