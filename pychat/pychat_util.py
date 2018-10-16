@@ -115,17 +115,15 @@ class Hall:
                player.turn = True 
             if player.turn == True and player.name in self.room_player_map:
                 player.active = False
-                
-                curr_room.active_players = []
-                for player in curr_room.players:
-                    if player.active:
-                        curr_room.active_players.append(player)
 
                 if curr_room.turn_num <= len(curr_room.active_players)-2:
-                    curr_room.turn_num += 1
+                    curr_room.turn_num = curr_room.turn_num
                 else:
                     curr_room.turn_num = 0
                 
+                msg = ' <fold>\n'
+                curr_room.broadcast(player, msg.encode())
+
                 player.turn == False
                 curr_room.betting()
             else:
@@ -141,9 +139,8 @@ class Hall:
                 try:
                     amount = msg.split()[1]
                     amount = int(amount)
-                    curr_room.broadcast(player, msg.encode())
+                    curr_room.broadcast(player, (msg+'\n').encode())
                     curr_room.current_bet += amount
-
                     
                     if curr_room.turn_num <= len(curr_room.active_players)-2:
                         curr_room.turn_num += 1
@@ -195,6 +192,24 @@ class Hall:
                 player.socket.sendall(msg.encode())
         
         elif "<quit>" in msg:
+
+            curr_room = self.rooms[self.room_player_map[player.name]]
+            if curr_room.active_players[curr_room.turn_num].name == player.name:
+               player.turn = True 
+            if player.turn == True and player.name in self.room_player_map:
+                player.active = False
+
+                if curr_room.turn_num <= len(curr_room.active_players)-2:
+                    curr_room.turn_num = curr_room.turn_num
+                else:
+                    curr_room.turn_num = 0
+                
+                msg = ' <fold>\n'
+                curr_room.broadcast(player, msg.encode())
+
+                player.turn == False
+                curr_room.betting()
+            
             player.socket.sendall(QUIT_STRING.encode())
             self.remove_player(player)
 
@@ -215,8 +230,6 @@ class Hall:
         print("Player: " + player.name + " has left\n")
 
 
-
-
 class Room:
     def __init__(self, name):
         self.players = [] # a list of sockets
@@ -225,8 +238,9 @@ class Room:
         self.last_raise = ''
         self.turn_num = 0
         self.current_bet = 0
-        self.board = Board()
         self.bet_round = 0
+        self.board = Board()
+
         # CREATE THE DECK FOR THIS GAME
         deck = Deck()
         deck.mix()
@@ -280,12 +294,11 @@ class Room:
         need = 3
 
         if (need-player_count <= 0):
-            msg = self.name + " Ready... " + '\n'
             self.game()
             
         else:
             for player in self.players:
-                msg = self.name + " Waiting for " + str(need-player_count) + " more player(s)" + '\n'
+                msg = "Waiting for " + str(need-player_count) + " more player(s)" + '\n'
                 player.socket.sendall(msg.encode())
     
     def broadcast(self, from_player, msg):
@@ -308,13 +321,6 @@ class Room:
 
     def game_continue(self, part):
 
-        for player in self.players:
-            self.display_cards(player)
-        self.display_board(self.board, self.players)
-        self.last_raise = ''
-        self.turn_num = 0
-        self.current_bet = 0
-
         if part == 1:
             self.board.flop(self.deck)
         elif part == 2:
@@ -323,6 +329,13 @@ class Room:
             self.board.river(self.deck)
         elif part == 4:
             self.game_over()
+
+        for player in self.players:
+            self.display_cards(player)
+        self.display_board(self.board, self.players)
+        self.last_raise = ''
+        self.turn_num = 0
+        self.current_bet = 0
 
     def game_over(self):
         for player in self.players:
@@ -352,8 +365,9 @@ class Room:
         current_turn = self.active_players[self.turn_num]
 
         for player in self.players:
-            msg = '\nwaiting on: ' + str(current_turn.name) + "\n\n"
-            player.socket.sendall(msg.encode())
+            if player.name != self.active_players[self.turn_num].name:
+                msg = '\nwaiting on: ' + str(current_turn.name) + "\n\n"
+                player.socket.sendall(msg.encode())
 
         current_turn.socket.sendall(instructions)
 
@@ -364,6 +378,7 @@ class Player:
         self.name = name
         self.cards = []
         self.chips = 1000
+        self.chips_in = 0
         self.active = True
         self.turn = False
 
