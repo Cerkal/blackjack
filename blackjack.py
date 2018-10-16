@@ -1,82 +1,158 @@
+import random
 from random import randint
 
-def define_suit():
-	suits = ['♤','♡','♢','♧']
-	l = randint(1,3)
-	return suits[l]
+suits = ['♤','♡','♢','♧']
+digits = ['2','3','4','5','6','7','8','9','10','J','Q','K','A']
+card_dic = {'2':2,'3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9,'10':10,'J':10,'Q':10,'K':10,'A':11}
 
-def define_card(t):
-	if t == 11:
-		return 'A'
-	elif t==12:
-		return 'J'
-	elif t==13:
-		return 'Q'
-	elif t==14:
-		return 'K'
-	else:
-		return t
+game = True
+playagain = False
+lines = ['','','','','']
 
-def display_card(card, suit):
-	card = str(card)
-	dig = "| "+card+" |"
-	if (len(card) == 1):
-		dig = "| "+card+"  |"
+def display_cards(cards, player):
+	lines = ['','','','','']
+	if player == 'dealer':
+		cards[0]=(' ',' ')
+	for card in cards:
+		dig = "| "+card[0]+"  |"
+		if len(card[0]) == 2:
+			dig = "| "+card[0]+" |"
+		suit = card[1]
+		card_image = [ " ____ ", "|"+suit+"   |", dig ,"|    |" ,"|____|" ]
+		for i,line in enumerate(card_image):
+			lines[i] = lines[i] + '  ' + line
 	
-	card_image = [ " ____ ", "|"+suit+"   |", dig ,"|    |" ,"|____|" ]
-	for c in card_image:
-		print(c)
+	for i, card in enumerate(range(0,5)):
+		print(lines[i])
 
+def draw_screen():
+	print('\n'*100)
+	display_cards(dealer.hand.cards, 'dealer')
+	#print(dealer.hand.cards)
+	print(dealer.hand.value)
 
-def my_card(mycard):
-	card = (define_card(mycard), define_suit())
+	display_cards(player.hand.cards, 'player')
+	#print(player.hand.cards)
+	print(player.hand.value)
 
-
-
-class Person():
-
-	money = 300;
-
-	card1 = ()
-	card2 = ()
+		
+class Deck():
 
 	def __init__(self):
-		pass
+		self.cards = []
 
-	def widthdraw(self, amount):
-		self.money = self.money - amount
+	def card(self):
+		for suit in suits:
+			for digit in digits:
+				self.cards.append((digit, suit))
 
-	def set_cards(self):
-		card1 = (define_card(randint(2,14)), define_suit())
-		card2 = (define_card(randint(2,14)), define_suit())
-		while card1 != card2:
-			self.card1 = card1
-			self.card2 = card2
-			break
+class Hand():
+	def __init__(self):
+		self.cards = []
+		self.value = 0
+		self.aces = 0
 
+	def add_card(self):
+		card = deck.cards.pop()
+		self.cards.append(card)
+		self.value += card_dic[card[0]]
+		if (card[0] == 'A'):
+			self.aces += 1
+		
+		self.handle_aces()
 
+	def handle_aces(self):
+		while self.value > 21 and self.aces > 0:
+			self.value -= 10;
+			self.aces -= 1
 
+class Person():
+	def __init__(self, hand):
+		self.hand = hand
+		self.chips = 1000
+		self.lastbet = 0
 
-dealer = Person()
-dealer.set_cards()
-print(dealer.card1)
-print(dealer.card2)
+	def place_bet(self):
+		while True:
+			try:
+				bet = int(input('Place your bet: '))
+				break
+			except:
+				print("Please enter a number")
 
-player = Person()
+		if bet <= self.chips:
+			self.chips -= bet
+			self.lastbet = bet
+		else:
+			print('You only have {} chips'.format(self.chips))
+			self.place_bet()
 
-player.widthdraw(30)
+	def add_bet(self):
+		self.chips += (self.lastbet * 2)
 
-print(player.money)
+	def make_move(self):
+		while True:
+			move = input('Hit or stay? (h/s): ')
+			if move != 'h':
+				return 'Player Stays'
+			else:
+				self.hand.add_card()
+				draw_screen()
+				if self.hand.value >= 21:
+					break
 
-player.set_cards()
+	def check(self):
+		global playagain
+		playagain = True
+		if self.hand.value > 21:
+			return '/////////////////////////////////\n///////////// Bust //////////////\n/////////////////////////////////'
+		elif self.hand.value == 21:
+			return '/////////////////////////////////\n////////////// Win ///////////////\n/////////////////////////////////'
 
-display_card(player.card1[0], player.card1[1])
-display_card(player.card2[0], player.card2[1])
+	def computer(self):
+		while self.hand.value < 16:
+			self.hand.add_card()
+		else:
+			return
 
+player = Person(Hand())
+dealer = Person(Hand())
+while game == True:
 
+	if playagain == True:
+		lines = ['','','','','']
+		player.hand.cards = []
+		dealer.hand.cards = []
+		
+		player.hand.value = 0
+		dealer.hand.value = 0
+		
+		dealer.hand.aces = 0
+		dealer.hand.aces = 0
 
-'''while True:
-	amount = int(input("Amount: "))
-	player.widthdraw(amount)
-	print(player.money)
-'''
+	print("\n\nYou have {} chips\n".format(player.chips))
+
+	player.place_bet()
+
+	deck = Deck()
+	deck.card()
+	random.shuffle(deck.cards)
+
+	player.hand.add_card()
+	player.hand.add_card()
+
+	dealer.hand.add_card()
+	dealer.hand.add_card()
+	
+	draw_screen()
+
+	if player.check() or dealer.check():
+		print(player.check())
+		playagain = True
+	else:
+
+		player.make_move()
+		print(player.check())
+
+		dealer.computer()
+		draw_screen()

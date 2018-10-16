@@ -2,12 +2,14 @@ import random
 import collections
 import time
 
-suits = ['♤','♡','♢','♧']
-digits = ['2','3','4','5','6','7','8','9','10','J','Q','K','A']
-card_dic = {'2':2,'3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9,'10':10,'J':10,'Q':10,'K':10,'A':11}
-order_dic = {'A':1,'2':2,'3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9,'10':10,'J':11,'Q':12,'K':13,'A':14}
+suits = ['♤', '♡', '♢', '♧']
+digits = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
+card_dic = {'2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10, 'J': 10, 'Q': 10, 'K': 10, 'A': 11}
+order_dic = {'A': 1, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10, 'J': 11, 'Q': 12, 'K': 13, 'A': 14}
 
-lines = ['  ','  ','  ','  ','  ']
+lines = ['  ', '  ', '  ', '  ', '  ']
+
+
 
 class Deck():
 	def __init__(self):
@@ -24,23 +26,17 @@ class Hand():
 		self.name = ''
 		self.active = True
 		self.current = 0
+
 	def addCard(self):
 		self.cards.append(deck.pop())
 
 	def time_to_choose(self, current):
 
 		val = check(self)
-		card_val = (val['order']*10)+(random.randint(0,3)*5)
+		card_val = (val['order']*10)+(random.randint(0, 3)*5)
 
 		raiseit = card_val - current
-		'''
-		if card_val > current*1.25:
-			chips.current_bet = raiseit + current
-			chips.pot += raiseit + current
-			self.current = chips.current_bet
-			return self.name + ': raise ' + str(raiseit) + '   ' + str(chips.current_bet) 
-		el
-		'''
+
 		if card_val < current*.75:
 			self.active = False
 			return self.name + ': fold' + '   ' + str(chips.current_bet)
@@ -57,20 +53,20 @@ class Chips():
 		self.pot = 0
 
 	def take_bet(self):
-	    while True:
-	        try:
-	            bet = int(input('How many chips would you like to bet? '))
-	            self.bet += bet
-	            self.current_bet = bet
-	        except ValueError:
-	            print('Sorry, a bet must be an integer!')
-	        else:
-	            if self.bet > self.total:
-	                print("Sorry, your bet can't exceed",chips.total)
-	            elif bet > 100:
-	            	print("Max bet is 100")
-	            else:
-	                break
+		while True:
+			try:
+				bet = int(input('How many chips would you like to bet? '))
+				self.bet += bet
+				self.current_bet = bet
+			except ValueError:
+				print('Sorry, a bet must be an integer!')
+			else:
+				if self.bet > self.total:
+					print("Sorry, your bet can't exceed", chips.total)
+				elif bet > 100:
+					print("Max bet is 100")
+				else:
+					break
 
 class Board():
 	def __init__(self):
@@ -92,14 +88,14 @@ def royal_flush(player, board):
 	cards = player.cards + board
 	pairs = ''
 	for suit in suits:
-		goal = [('A',suit),('K',suit),('Q',suit),('J',suit),('10',suit)]
+		goal = [('A', suit), ('K', suit), ('Q', suit), ('J', suit), ('10', suit)]
 		for card in cards:
 			if card in goal:
 				goal.remove(card)
 				pairs = suit
 				highcard = 0;
 		if goal == []:
-			return {'order':9, 'pairs':pairs,'highcard':highcard,'name':player.name}
+			return {'order':9, 'pairs':pairs, 'highcard':highcard, 'name':player.name}
 
 def straight_flush(player, board):
 	cards = player.cards + board
@@ -125,7 +121,7 @@ def straight_flush(player, board):
 			straight = []
 			obj = False
 
-			for i,x in enumerate(l):
+			for i, x in enumerate(l):
 				if i+1 < len(l) and len(straight)<5:
 					if x+1 == l[i+1]:
 						straight.append(x)
@@ -206,7 +202,7 @@ def straight(player, board):
 	straight = []
 	obj = False
 
-	for i,x in enumerate(l):
+	for i, x in enumerate(l):
 		if i+1 < len(l) and len(straight)<5:
 			if x+1 == l[i+1]:
 				straight.append(x)
@@ -233,7 +229,7 @@ def three_of_a_kind(player, board):
 			pairs = each
 			del before[each]
 			highcard = max(before)
-			return {'order':3, 'pairs':pairs,'highcard':highcard,'name':player.name}
+			return {'order':3, 'pairs':pairs, 'highcard':highcard, 'name':player.name}
 
 def two_pair(player, board):
 	cards = player.cards + board
@@ -251,7 +247,7 @@ def two_pair(player, board):
 		for x in pairs:
 			del c[x]
 		highcard = max(c)
-		return {'order':2, 'pairs':max(pairs),'highcard':highcard,'name':player.name}
+		return {'order':2, 'pairs':max(pairs), 'highcard':highcard, 'name':player.name}
 
 def pair(player, board):
 	cards = player.cards + board
@@ -272,7 +268,7 @@ def pair(player, board):
 		pair = theone;
 		del c[theone]
 		highcard = max(c)
-		return {'order':1,'pairs': pair, 'highcard': highcard, 'name':player.name}
+		return {'order':1, 'pairs': pair, 'highcard': highcard, 'name':player.name}
 
 def highcard(player, board):
 	cards = player.cards
@@ -280,26 +276,26 @@ def highcard(player, board):
 
 	ordered = order_cards(cards)
 	highcard = max(ordered)
-	return {'order':0,'pairs': 0, 'highcard': highcard, 'name':player.name}
+	return {'order':0, 'pairs': 0, 'highcard': highcard, 'name':player.name}
 
 def display_cards(cards, player):
-	lines = ['  ','  ','  ','  ','  ']
+	lines = ['  ', '  ', '  ', '  ', '  ']
 	if player == 'dealer':
-		cards[0]=(' ',' ')
+		cards[0]=(' ', ' ')
 	for card in cards:
 		dig = "| "+card[0]+"  |"
 		if len(card[0]) == 2:
 			dig = "| "+card[0]+" |"
 		suit = card[1]
-		card_image = [ " ____ ", "|"+suit+"   |", dig ,"|    |" ,"|____|" ]
-		for i,line in enumerate(card_image):
+		card_image = [ " ____ ", "|"+suit+"   |", dig , "|    |" , "|____|" ]
+		for i, line in enumerate(card_image):
 			lines[i] = lines[i] + '  ' + line
 	
-	for i, card in enumerate(range(0,5)):
+	for i, card in enumerate(range(0, 5)):
 		print(lines[i])
 
 def display_all_cards(cards_all, player):
-	lines = ['','','','','']
+	lines = ['', '', '', '', '']
 	for cards in cards_all:
 		count = 0
 		for card in cards:
@@ -310,11 +306,11 @@ def display_all_cards(cards_all, player):
 			if len(card[0]) == 2:
 				dig = "| "+card[0]+" |"
 			suit = card[1]
-			card_image = [ " ____ ", "|"+suit+"   |", dig ,"|    |" ,"|____|" ]
-			for i,line in enumerate(card_image):
+			card_image = [ " ____ ", "|"+suit+"   |", dig , "|    |" , "|____|" ]
+			for i, line in enumerate(card_image):
 				lines[i] = lines[i] + spaces + line
 		
-	for i, card in enumerate(range(0,5)):
+	for i, card in enumerate(range(0, 5)):
 		print(lines[i])
 
 def order_cards(cards):
@@ -377,14 +373,14 @@ def compare(parts):
 
 
 while True:
-    try:
-    	num_of_players = int(input('Number of players: '))
-    	if num_of_players > 5:
-    		print('Sorry, number of players must be less than 6')
-    	else:
-    		break
-    except ValueError:
-        print('Sorry, must be an integer!')
+	try:
+		num_of_players = int(input('Number of players: '))
+		if num_of_players > 5:
+			print('Sorry, number of players must be less than 6')
+		else:
+			break
+	except ValueError:
+		print('Sorry, must be an integer!')
 
 
 while True:
@@ -409,29 +405,26 @@ while True:
 	# SET PLAYER ARRAY
 	computer = []
 
+
+	# PRINT CARDS DISPLAY
+	print('\n'*100)
+	line = '    Your Player      '
+	for comp in computer:
+		line += comp.name + '          '
+
+
 	for n in range(num_of_players-1):
 		computer.append(Hand())
 		computer[n].name = 'Player'+str(n)
 		computer[n].addCard()
 		computer[n].addCard()
 
-	# TAKE BET
-	# chips.take_bet()
-
-	board.flop()
-	board.turn()
-	board.river()
-	
 	all_cards = [player.cards]
 	for x in computer:
 		all_cards.append(x.cards)
 
-	
-	# PRINT CARDS DISPLAY
-	print('\n'*100)
-	line = '    Your Player      '
-	for comp in computer:
-		line += comp.name + '          '
+
+	board.flop()
 
 	display_all_cards(all_cards, 'player')
 	print(line) 
@@ -441,18 +434,60 @@ while True:
 	print('Your turn to bet')
 	chips.take_bet()
 
-	############ MACHINE BETS HERE ############
-
+	############################################
 
 	for comp in computer:
-		print('\n')
-		time.sleep(1)
-		print(comp.time_to_choose(chips.current_bet))
+		if comp.active:
+			print('\n')
+			time.sleep(1)
+			print(comp.time_to_choose(chips.current_bet))
+			
+	time.sleep(1)
+
+	############################################
+	
+	board.turn()
+
+	display_all_cards(all_cards, 'player')
+	print(line) 
+	display_cards(board.cards, 'player')
+
+	print('Your turn to bet')
+	chips.take_bet()
+
+	############################################
+
+	for comp in computer:
+		if comp.active:
+			print('\n')
+			time.sleep(1)
+			print(comp.time_to_choose(chips.current_bet))
 		
 	time.sleep(1)
 
 	############################################
-	# next round....
+
+	board.river()
+
+	display_all_cards(all_cards, 'player')
+	print(line) 
+	display_cards(board.cards, 'player')
+
+	print('Your turn to bet')
+	chips.take_bet()
+
+
+	############################################
+
+	for comp in computer:
+		if comp.active:
+			print('\n')
+			time.sleep(1)
+			print(comp.time_to_choose(chips.current_bet))
+			
+	time.sleep(1)
+
+	############################################
 
 	print(chips.pot)
 
