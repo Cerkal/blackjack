@@ -1,6 +1,6 @@
 import select, socket, sys
-from pychat_util import Room, Hall, Player
-import pychat_util
+from holdem_util import Room, Hall, Player
+import holdem_util
 
 READ_BUFFER = 4096
 
@@ -10,7 +10,7 @@ if len(sys.argv) < 2:
 else:
     server_connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_connection.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    server_connection.connect((sys.argv[1], pychat_util.PORT))
+    server_connection.connect((sys.argv[1], holdem_util.PORT))
 
 def prompt():
     print('>', end=' ', flush = True)
@@ -29,7 +29,7 @@ while True:
                 print("Server down!")
                 sys.exit(2)
             else:
-                if msg == pychat_util.QUIT_STRING.encode():
+                if msg == holdem_util.QUIT_STRING.encode():
                     sys.stdout.write('Bye\n')
                     sys.exit(2)
                 else:

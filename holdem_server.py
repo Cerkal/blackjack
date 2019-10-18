@@ -2,13 +2,13 @@
 # 14-Jun-2013
 
 import select, socket, sys, pdb
-from pychat_util import Hall, Room, Player
-import pychat_util
+from holdem_util import Hall, Room, Player
+import holdem_util
 
 READ_BUFFER = 4096
 
 host = sys.argv[1] if len(sys.argv) >= 2 else ''
-listen_sock = pychat_util.create_socket((host, pychat_util.PORT))
+listen_sock = holdem_util.create_socket((host, holdem_util.PORT))
 
 hall = Hall()
 connection_list = []
